@@ -75,7 +75,7 @@ plugins:
   - { id: craft,     builtin: true }                                                  # /code-review, /grill, /due-diligence — rituals the operator can type
   - { id: friction,  builtin: true }                                                  # harness-friction ledger — a rough edge leaves evidence
   - { id: delegates, builtin: true }                                                  # delegate_to — an optional coding agent, only on the operator's say-so
-  - { id: terminal,  url: https://github.com/protoLabsAI/terminal-plugin, ref: v0.4.1 }  # the OPERATOR's shell beside chat (not an agent tool)
+  - { id: terminal,  url: https://github.com/protoLabsAI/terminal-plugin, ref: v0.5.1 }  # the OPERATOR's shell beside chat (not an agent tool)
   - { id: github,    url: https://github.com/protoLabsAI/github-plugin,   ref: v0.8.0 }  # READ tools over `gh` (issues, PRs, diffs, CI, files); writes off by default
 
 enabled: [engineer, craft, friction, delegates, terminal, github]   # suggested turn-on list

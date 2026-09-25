@@ -60,7 +60,8 @@ bundle names them, so there's one copy of each to keep correct.
 The terminal plugin gives **you** a real shell (xterm.js on a PTY) in the console, next to
 the chat and the code pane. It's the driver's seat: run the app, poke at it, `git commit`.
 It isn't an agent tool. The agent runs its own commands through `run_command`, which you
-approve. The terminal's WebSocket is gated by the operator bearer. On Windows it needs
+approve. The terminal's WebSocket is gated by the operator bearer, via a single-use ticket
+so it also works on a fleet member behind the hub (terminal-plugin v0.5.1+). On Windows it needs
 `pywinpty` (declared with a `sys_platform == 'win32'` marker; the install dialog offers it).
 macOS and Linux use the stdlib PTY and need nothing.
 
