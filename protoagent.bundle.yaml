@@ -139,6 +139,12 @@ config:                                              # recommended defaults (you
 # Agent archetype (ADR 0042 / 0100) — presents this bundle as the "Engineer" agent type
 # in the new-agent picker. `soul_preset` gives a DIRECT `plugin install <url>` the
 # Engineer persona even on a host whose catalog has no engineer row.
+#
+# No `requires_tools` (capability contract) on purpose: every tool the persona commits to
+# (show_code, run_command, open_in_editor, onboard_project, memory_ingest) is a CORE tool
+# bound by the recommended `filesystem`/`onboarding` config above, not by a member plugin,
+# and it never commits to a GitHub write. A contract naming core tools would fail
+# scripts/verify_bundle.py (which loads members only) without catching anything new.
 archetype:
   label: Engineer
   icon: Compass

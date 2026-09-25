@@ -32,6 +32,16 @@ def main(bundle_src: str) -> int:
     # Scope EVERYTHING to a throwaway dir before importing graph modules — the
     # installer reads PROTOAGENT_PLUGINS_LOCK at import time, the rest at call time.
     scratch = Path(tempfile.mkdtemp(prefix="bundle-verify-"))
+    try:
+        return _verify(bundle_src, scratch)
+    finally:
+        # Installed member checkouts live here — don't leave them behind on a reused runner.
+        import shutil
+
+        shutil.rmtree(scratch, ignore_errors=True)
+
+
+def _verify(bundle_src: str, scratch: Path) -> int:
     (scratch / "cfg").mkdir()
     os.environ["PROTOAGENT_CONFIG_DIR"] = str(scratch / "cfg")
     os.environ["PROTOAGENT_PLUGINS_DIR"] = str(scratch / "cfg" / "plugins")
@@ -123,6 +133,11 @@ def main(bundle_src: str) -> int:
     }
     manifest_doc = yaml.safe_load((Path(bundle_src) / "protoagent.bundle.yaml").read_text()) or {}
     requires = list(((manifest_doc.get("archetype") or {}).get("requires_tools")) or [])
+    if not requires:
+        # Not a vacuous pass by accident: an archetype whose persona leans only on CORE
+        # tools (gated by core config, not by a member plugin) declares no contract here —
+        # this loader-only harness can't see core tools. Say so instead of implying a check.
+        print("  contract: none declared (the persona's tools are core — see the manifest)")
     for name in requires:
         if name in bound:
             print(f"  contract {name}: bound")

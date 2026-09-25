@@ -3,9 +3,10 @@
 # verify-bundle.yml workflow into a real, unit-testable script — see #2669's
 # "commit the stubbed git/gh dry-run test harness" work item. Previously this
 # logic only lived inline in YAML `run:` blocks, so verifying a change to it
-# meant a manual dry-run against a real GitHub repo. tests/test_bump_pins_pr.py
-# drives this file directly, with `gh` stubbed on PATH and a real throwaway git
-# repo — see that file's docstring for the harness shape.
+# meant a manual dry-run against a real GitHub repo. The canonical copy lives in
+# protoAgent's examples/bundles/template/scripts/, and protoAgent's
+# tests/test_bump_pins_pr.py drives it with `gh` stubbed on PATH and a real throwaway
+# git repo; this file is a verbatim copy, so re-sync it from there rather than editing.
 #
 # Two subcommands, mirroring the workflow's two `bump`-job steps:
 #   open-or-update            — reuse the ONE `bump-pins` branch/PR per bundle repo (dedup;

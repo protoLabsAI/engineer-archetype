@@ -243,6 +243,20 @@ boundary). `scripts/verify_bundle.py`, run by `.github/workflows/verify-bundle.y
 every PR and weekly, installs this manifest into a scratch agent on a fresh protoAgent
 checkout, loads every member with the recommended config, and probes each declared console
 view. `scripts/check_bundle_updates.py` opens a bump PR only for an out-of-range release.
+### Pin-bump PR lifecycle
+
+The `bump` job (weekly, on dispatch, and on a member's `member-released` dispatch) reuses
+**one** `bump-pins` branch and PR per repo instead of piling up dated branches, and it
+rewrites that branch wholesale each run, so don't hand-edit it. A PR opened with the
+repository `GITHUB_TOKEN` never auto-starts its `pull_request` run: GitHub holds it as
+`action_required` until a maintainer approves it. The job detects that stall, labels and
+comments on the PR, and fails, so an unapproved candidate turns the schedule red instead of
+rotting. Approve the run, let `verify` go green, then merge.
+
+While this bundle depends on core that hasn't merged yet, the repo variable
+`PROTOAGENT_REF` (e.g. `refs/pull/<n>/head`) points `verify` at that core ref. Delete it
+once the core change lands, so `verify` tracks `main` again.
+
 Run the verify locally from a protoAgent checkout:
 
 ```
