@@ -47,10 +47,13 @@ jobs:
 
       # The core to verify against — keep in sync with the manifest's
       # `verified_against:` (a release tag), or use `main` to verify ahead.
+      # The repo variable PROTOAGENT_REF overrides `main` while this bundle depends on
+      # core that hasn't merged yet (e.g. `refs/pull/<n>/head`) — delete the variable
+      # once it lands, so verify tracks main again.
       - uses: actions/checkout@v4
         with:
           repository: protoLabsAI/protoAgent
-          ref: main
+          ref: ${{ vars.PROTOAGENT_REF || 'main' }}
           path: protoagent
 
       - uses: astral-sh/setup-uv@v5
