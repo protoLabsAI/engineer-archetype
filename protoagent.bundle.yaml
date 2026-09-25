@@ -1,0 +1,146 @@
+# A protoAgent plugin BUNDLE (ADR 0040) — the Engineer archetype: a hands-on
+# pair-programming NAVIGATOR for the operator's own machine. This is the dedicated
+# bundle repo protoAgent's archetype-catalog.json `engineer` row installs; the persona
+# ships as protoAgent's `engineer` soul preset, and its two skills (repo-onboard,
+# debug-loop) ship as protoAgent's in-tree `engineer` plugin, which this bundle turns on.
+#
+# Install (onto any host):  python -m server plugin install <this-repo-url>
+# — or pick "Engineer" in the new-agent picker.
+#
+# NAVIGATOR, NOT SOLVER. The operator drives and authors every change; the agent
+# orients, reproduces, points at evidence with `show_code`, asks for the operator's
+# hypothesis first, reviews their diff, and runs the checks. It edits or commits only
+# when the operator's latest message says so. See README.md for why.
+#
+# CORE FLOOR — protoAgent >= 0.180.0 (bundles carry no min-version, so it is stated
+# here and in the README, not enforced):
+#   * the in-tree `engineer` skill pack ships with the core (protoAgent PR that added
+#     this archetype's catalog row); on an older core that `builtin` member is missing
+#     and the agent boots without its skills;
+#   * the terminal member declares `pywinpty; sys_platform == 'win32'`, and cores before
+#     0.180.0 (#3618) ignored the marker and reported that Windows-only dep MISSING on
+#     macOS/Linux;
+#   * `filesystem.code_pane` (show_code) is 0.179.0+, run_auto_approve 0.177.0+,
+#     open_in_editor 0.176.0+.
+#
+# FIRST-RUN SETUP — two optional Configure answers (core >= 0.144.0 renders
+# `config_inputs:`): a local checkout to start in — written to `terminal.cwd` (the
+# terminal opens there) and, because it is flagged `project: true`, registered as a
+# managed project (ADR 0095) the agent's filesystem tools can reach; leave it blank and
+# onboard repos from chat instead ("onboard github.com/owner/repo") — and whether the
+# GitHub write tools bind (off by default).
+#
+# BEFORE YOU START — `gh` (GitHub CLI) on the PATH the agent sees, logged in
+# (`gh auth login`) or a token in Settings ▸ GitHub. Without it the GitHub tools answer
+# with a classified "gh missing / not authenticated" error and the view shows a setup
+# card; nothing else breaks.
+#
+# Everything else is a RECOMMENDED DEFAULT below, editable in Settings afterwards. The
+# create-time form can't ask for these: `filesystem.*` and `onboarding.*` are core
+# sections a bundle may not prompt for (graph/plugins/installer.py
+# CONFIG_INPUT_RESERVED_SECTIONS), so they arrive as defaults the operator adjusts:
+#   * Settings ▸ Capabilities ▸ Project onboarding — where clones land (`~/code`) and
+#     which sources may be cloned (any GitHub repo).
+#   * Settings ▸ Tools ▸ Filesystem — the editor (`zed`), the code pane, the commands
+#     that run without asking.
+#
+# MODEL — deliberately unset: the agent uses the host's model connection (Settings ▸
+# Host). A navigator turn reads a lot of code; a strong model with prompt caching is
+# the comfortable choice.
+#
+# PIN LIFECYCLE (ADR 0049): the external member is pinned to a release TAG; on core
+# >= 0.146 that pin is a FLOOR (installs take the newest COMPATIBLE tag — caret
+# semantics, so for 0.x the minor is the boundary). Bump it deliberately only to adopt
+# an out-of-range release; the verify workflow proves each pin set. Keep member
+# entries on ONE line — scripts/check_bundle_updates.py rewrites `ref:` in place.
+
+id: engineer-archetype
+name: Engineer
+description: >-
+  A hands-on pair-programming navigator for the operator's own machine. Point it at a
+  repo (a git URL or a folder) and it clones or registers it, proves the toolchain,
+  writes a short repo card, and gives a guided tour; point it at a bug and it walks
+  you through it one checkpoint per turn — reproduce, narrow, your hypothesis first,
+  you write the fix, it reviews and runs the checks, you commit. It points at code in
+  the console's code pane, opens your editor on the line when you're about to type,
+  gives you a real terminal beside chat, and reads GitHub (issues, PRs, CI) to get up to
+  speed. It never edits, commits, or posts to GitHub unless you ask.
+
+# The core version this pin set was last verified against (ADR 0049) — metadata, not
+# enforced. See CORE FLOOR above.
+verified_against: 0.180.0
+
+plugins:
+  - { id: engineer,  builtin: true }                                                  # the navigator skills: repo-onboard + debug-loop (off for every other agent)
+  - { id: craft,     builtin: true }                                                  # /code-review, /grill, /due-diligence — rituals the operator can type
+  - { id: friction,  builtin: true }                                                  # harness-friction ledger — a rough edge leaves evidence
+  - { id: delegates, builtin: true }                                                  # delegate_to — an optional coding agent, only on the operator's say-so
+  - { id: terminal,  url: https://github.com/protoLabsAI/terminal-plugin, ref: v0.4.1 }  # the OPERATOR's shell beside chat (not an agent tool)
+  - { id: github,    url: https://github.com/protoLabsAI/github-plugin,   ref: v0.8.0 }  # READ tools over `gh` (issues, PRs, diffs, CI, files); writes off by default
+
+enabled: [engineer, craft, friction, delegates, terminal, github]   # suggested turn-on list
+
+# Create-time setup prompts (#2934, core >= 0.144.0) — the Configure step in the Setup
+# Wizard and the New Agent panel renders these and writes each answer at its key.
+config_inputs:
+  - { key: terminal.cwd, label: "A local repo to start in (absolute path; optional — it is registered as a project and the terminal opens there)", type: path, project: true }
+  - { key: github.write, label: "Let the agent write to GitHub when you ask (open/comment/label/merge issues and PRs). Off = read-only", type: boolean, default: false }
+
+config:                                              # recommended defaults (you apply them)
+  # Hands-on coding on the operator's machine: read and run freely, with a per-command
+  # approval prompt for anything not on the auto-approve list.
+  filesystem:
+    enabled: true
+    allow_run: true
+    run_requires_approval: true
+    # Read-only git runs without asking (core >= 0.177.0). Tests and builds EXECUTE the
+    # repo's code, so they still ask by default — add your own (`npm test`,
+    # `npx tsc --noEmit`, `uv run pytest`, `mise exec -- npm test`, …) once you trust the
+    # repo, or pick "Allow for this session" on the first prompt.
+    run_auto_approve:
+      - git status
+      - git diff
+      - git log
+      - git show
+      - git branch --show-current
+    # The console code pane (core >= 0.179.0): binds `show_code`, the persona's way of
+    # pointing at exact lines beside chat.
+    code_pane: true
+    # `open_in_editor` (core >= 0.176.0) — the operator's editor at path:line. zed is the
+    # house default (and the Zed Agent Panel pairs with it, see README); `code -g` or
+    # `cursor -g` for VS Code / Cursor, or "" to unbind the tool.
+    editor_command: zed
+  # Project onboarding (#2555): where `onboard_project` clones and which sources it may
+  # clone. Opting into this archetype IS the consent for "any GitHub repo, cloned under
+  # ~/code"; narrow `allow` to your org (github.com/your-org/*) if you want less.
+  # Registered projects are read-write so "apply it" works when the operator asks.
+  onboarding:
+    enabled: true
+    root: ~/code
+    allow: ["github.com/*"]
+    write_default: true
+  # GitHub over the `gh` CLI (needs `gh` installed + authenticated on the host, or a token
+  # in Settings ▸ GitHub). READ-ONLY by default: issues, PRs, diffs, CI status and repo
+  # files — for getting up to speed and reading the CI failure you're debugging. The
+  # navigator never posts, pushes, labels or merges on its own; `write: true` (the
+  # Configure toggle above, or Settings ▸ GitHub) binds the write tools for when you ask.
+  # No `default_repo`: the plugin derives repos from the projects you onboard.
+  github:
+    write: false
+  friction:
+    # Friction belongs to the harness, not to the repo being worked on: leave
+    # issue_repo empty (copy-to-clipboard) or point it at protoLabsAI/protoAgent — never
+    # let it default to the operator's project.
+    issue_repo: ""
+    # run_command is this persona's main instrument, not an escape hatch (cores before
+    # 0.180.0 logged every call as friction).
+    escape_hatch_exempt: [run_command]
+
+# Agent archetype (ADR 0042 / 0100) — presents this bundle as the "Engineer" agent type
+# in the new-agent picker. `soul_preset` gives a DIRECT `plugin install <url>` the
+# Engineer persona even on a host whose catalog has no engineer row.
+archetype:
+  label: Engineer
+  icon: Compass
+  soul_preset: engineer
+  blurb: A hands-on pair-programming navigator — onboards any repo, reproduces the bug, and points at the evidence; you write the fix, it reviews. A code pane beside chat, a real terminal, and your editor one click away.
