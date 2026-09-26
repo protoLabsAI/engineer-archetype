@@ -135,7 +135,7 @@ config:                                              # recommended defaults (you
   # in Settings ▸ GitHub). READ-ONLY by default: issues, PRs, diffs, CI status and repo
   # files — for getting up to speed and reading the CI failure you're debugging. The
   # navigator never posts, pushes, labels or merges on its own; `write: true` (the
-  # Configure toggle above, or Settings ▸ GitHub) binds the write tools for when you ask.
+  # *Allow GitHub writes* switch above, or Settings ▸ GitHub) binds the write tools for when you ask.
   # No `default_repo`: the plugin derives repos from the projects you onboard.
   # Terminal (v0.9.0+): split panes, login shells, and agent terminal tools gated by
   # `agent_access`. READ for a navigator: the agent can list and read your terminals ("what's
