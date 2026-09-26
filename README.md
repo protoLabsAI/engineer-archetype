@@ -117,6 +117,8 @@ what an older core misses:
 - the terminal and github plugins need 0.27.0 (console views);
 - `show_code` / the code pane needs 0.179.0, `run_auto_approve` 0.177.0, `open_in_editor`
   0.176.0.
+- the set-up step's explanation lines (`help:` on `config_inputs`) need 0.183.0; an older core
+  ignores `help` and shows only the short labels (*Start in a local repo*, *Allow GitHub writes*).
 
 ## First run
 

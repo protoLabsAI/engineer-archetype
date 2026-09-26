@@ -21,7 +21,9 @@
 #     0.180.0 (#3618) ignored the marker and reported that Windows-only dep MISSING on
 #     macOS/Linux;
 #   * `filesystem.code_pane` (show_code) is 0.179.0+, run_auto_approve 0.177.0+,
-#     open_in_editor 0.176.0+.
+#     open_in_editor 0.176.0+;
+#   * the `help:` line under each `config_inputs` field renders on 0.183.0+; older
+#     cores ignore `help` and show the short label alone.
 #
 # FIRST-RUN SETUP — two optional set-up answers (core >= 0.144.0 renders
 # `config_inputs:`): a local checkout to start in — written to `terminal.cwd` (the
@@ -68,7 +70,7 @@ description: >-
 
 # The core version this pin set was last verified against (ADR 0049) — metadata, not
 # enforced. See CORE FLOOR above.
-verified_against: 0.182.0
+verified_against: 0.183.0
 
 plugins:
   - { id: engineer,  builtin: true }                                                  # the navigator skills: repo-onboard + debug-loop (off for every other agent)
@@ -83,7 +85,7 @@ enabled: [engineer, craft, friction, delegates, terminal, github]   # suggested 
 # Create-time setup prompts (#2934, core >= 0.144.0) — the set-up step in the Setup
 # Wizard and the New Agent panel renders these and writes each answer at its key.
 # `label` is the short field name; `help` is the explanation line under it (rendered by
-# core releases that understand `help`; older cores ignore it and show the label alone).
+# core >= 0.183.0; older cores ignore it and show the label alone).
 config_inputs:
   - key: terminal.cwd
     label: "Start in a local repo"
