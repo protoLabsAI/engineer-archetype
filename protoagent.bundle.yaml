@@ -23,7 +23,7 @@
 #   * `filesystem.code_pane` (show_code) is 0.179.0+, run_auto_approve 0.177.0+,
 #     open_in_editor 0.176.0+.
 #
-# FIRST-RUN SETUP — two optional Configure answers (core >= 0.144.0 renders
+# FIRST-RUN SETUP — two optional set-up answers (core >= 0.144.0 renders
 # `config_inputs:`): a local checkout to start in — written to `terminal.cwd` (the
 # terminal opens there) and, because it is flagged `project: true`, registered as a
 # managed project (ADR 0095) the agent's filesystem tools can reach; leave it blank and
@@ -80,11 +80,21 @@ plugins:
 
 enabled: [engineer, craft, friction, delegates, terminal, github]   # suggested turn-on list
 
-# Create-time setup prompts (#2934, core >= 0.144.0) — the Configure step in the Setup
+# Create-time setup prompts (#2934, core >= 0.144.0) — the set-up step in the Setup
 # Wizard and the New Agent panel renders these and writes each answer at its key.
+# `label` is the short field name; `help` is the explanation line under it (rendered by
+# core releases that understand `help`; older cores ignore it and show the label alone).
 config_inputs:
-  - { key: terminal.cwd, label: "A local repo to start in (absolute path; optional — it is registered as a project and the terminal opens there)", type: path, project: true }
-  - { key: github.write, label: "Let the agent write to GitHub when you ask (open/comment/label/merge issues and PRs). Off = read-only", type: boolean, default: false }
+  - key: terminal.cwd
+    label: "Start in a local repo"
+    help: "Registered as a managed project the agent can reach, and the terminal opens there."
+    type: path
+    project: true
+  - key: github.write
+    label: "Allow GitHub writes"
+    help: "Lets the agent open, comment on, label and merge issues and PRs when you ask. Off = read-only."
+    type: boolean
+    default: false
 
 config:                                              # recommended defaults (you apply them)
   # Hands-on coding on the operator's machine: read and run freely, with a per-command
