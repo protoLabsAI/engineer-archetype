@@ -68,14 +68,14 @@ description: >-
 
 # The core version this pin set was last verified against (ADR 0049) — metadata, not
 # enforced. See CORE FLOOR above.
-verified_against: 0.180.0
+verified_against: 0.182.0
 
 plugins:
   - { id: engineer,  builtin: true }                                                  # the navigator skills: repo-onboard + debug-loop (off for every other agent)
   - { id: craft,     builtin: true }                                                  # /code-review, /grill, /due-diligence — rituals the operator can type
   - { id: friction,  builtin: true }                                                  # harness-friction ledger — a rough edge leaves evidence
   - { id: delegates, builtin: true }                                                  # delegate_to — an optional coding agent, only on the operator's say-so
-  - { id: terminal,  url: https://github.com/protoLabsAI/terminal-plugin, ref: v0.5.1 }  # the OPERATOR's shell beside chat (not an agent tool)
+  - { id: terminal,  url: https://github.com/protoLabsAI/terminal-plugin, ref: v0.9.0 }  # the OPERATOR's shell beside chat; the agent may READ it (agent_access: read)
   - { id: github,    url: https://github.com/protoLabsAI/github-plugin,   ref: v0.8.0 }  # READ tools over `gh` (issues, PRs, diffs, CI, files); writes off by default
 
 enabled: [engineer, craft, friction, delegates, terminal, github]   # suggested turn-on list
@@ -135,6 +135,14 @@ config:                                              # recommended defaults (you
   # navigator never posts, pushes, labels or merges on its own; `write: true` (the
   # Configure toggle above, or Settings ▸ GitHub) binds the write tools for when you ask.
   # No `default_repo`: the plugin derives repos from the projects you onboard.
+  # Terminal (v0.9.0+): split panes, login shells, and agent terminal tools gated by
+  # `agent_access`. READ for a navigator: the agent can list and read your terminals ("what's
+  # this error?"), but can't run commands in them. `terminal_run` would bypass run_command's
+  # approval prompt and auto-approve list. The operator drives the shell. Raise to `run` in
+  # Settings ▸ Plugins ▸ Terminal if you want the agent to run commands in its own visible
+  # "Agent" tab; `off` hides your terminals from it entirely.
+  terminal:
+    agent_access: read
   github:
     write: false
   friction:
