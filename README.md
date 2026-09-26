@@ -89,7 +89,7 @@ unauthenticated.
 
 **Writes are off** (`github.write: false`): the write tools (create/edit/close/merge issues
 and PRs, comments, labels, assignees) aren't even bound. To let the agent post *when you ask
-it to*, flip the Configure step's GitHub toggle at create time, or later set:
+it to*, flip *Allow GitHub writes* on the set-up step at create time, or later set:
 
 ```yaml
 github:
@@ -117,12 +117,14 @@ what an older core misses:
 - the terminal and github plugins need 0.27.0 (console views);
 - `show_code` / the code pane needs 0.179.0, `run_auto_approve` 0.177.0, `open_in_editor`
   0.176.0.
+- the set-up step's explanation lines (`help:` on `config_inputs`) need 0.183.0; an older core
+  ignores `help` and shows only the short labels (*Start in a local repo*, *Allow GitHub writes*).
 
 ## First run
 
-**The Configure step asks two optional questions.** First, *a local repo to start in* (an
-absolute path): it's registered as a managed project the agent can reach, and the terminal
-opens there. Second, whether the *GitHub write tools* bind (off by default; see above).
+**The set-up step asks two optional questions** (after you pick Engineer). First, *Start in
+a local repo* (a folder on the agent's machine): it's registered as a managed project the agent can reach, and the terminal
+opens there. Second, *Allow GitHub writes* — whether the GitHub write tools bind (off by default; see above).
 Leave the repo blank and onboard from chat instead:
 
 > onboard github.com/owner/repo and give me the repo card
@@ -140,7 +142,7 @@ aren't asked:
 | `filesystem.run_auto_approve` | read-only git: `git status`, `git diff`, `git log`, `git show`, `git branch --show-current` | same |
 | `filesystem.code_pane` | `true`: binds `show_code` and the console's Code pane | same (Tools ▸ Filesystem ▸ Shell & filesystem tools) |
 | `filesystem.editor_command` | `zed`. Use `code -g` for VS Code, `cursor -g` for Cursor, or empty to unbind `open_in_editor` | same |
-| `github.write` | `false`: read tools only | Settings ▸ GitHub, or the Configure toggle |
+| `github.write` | `false`: read tools only | Settings ▸ GitHub, or the *Allow GitHub writes* switch at create time |
 | `friction.issue_repo` | empty (copy to clipboard). Point it at `protoLabsAI/protoAgent` if you file harness friction upstream, **never** at the repo you're working in | Settings ▸ Plugins (Friction) |
 | `friction.escape_hatch_exempt` | `[run_command]`, the persona's main instrument, not an escape hatch | same |
 | model | **unset**: uses your host's model connection | Settings ▸ Host / the agent's model picker |

@@ -21,9 +21,11 @@
 #     0.180.0 (#3618) ignored the marker and reported that Windows-only dep MISSING on
 #     macOS/Linux;
 #   * `filesystem.code_pane` (show_code) is 0.179.0+, run_auto_approve 0.177.0+,
-#     open_in_editor 0.176.0+.
+#     open_in_editor 0.176.0+;
+#   * the `help:` line under each `config_inputs` field renders on 0.183.0+; older
+#     cores ignore `help` and show the short label alone.
 #
-# FIRST-RUN SETUP — two optional Configure answers (core >= 0.144.0 renders
+# FIRST-RUN SETUP — two optional set-up answers (core >= 0.144.0 renders
 # `config_inputs:`): a local checkout to start in — written to `terminal.cwd` (the
 # terminal opens there) and, because it is flagged `project: true`, registered as a
 # managed project (ADR 0095) the agent's filesystem tools can reach; leave it blank and
@@ -68,7 +70,7 @@ description: >-
 
 # The core version this pin set was last verified against (ADR 0049) — metadata, not
 # enforced. See CORE FLOOR above.
-verified_against: 0.182.0
+verified_against: 0.183.0
 
 plugins:
   - { id: engineer,  builtin: true }                                                  # the navigator skills: repo-onboard + debug-loop (off for every other agent)
@@ -80,11 +82,21 @@ plugins:
 
 enabled: [engineer, craft, friction, delegates, terminal, github]   # suggested turn-on list
 
-# Create-time setup prompts (#2934, core >= 0.144.0) — the Configure step in the Setup
+# Create-time setup prompts (#2934, core >= 0.144.0) — the set-up step in the Setup
 # Wizard and the New Agent panel renders these and writes each answer at its key.
+# `label` is the short field name; `help` is the explanation line under it (rendered by
+# core >= 0.183.0; older cores ignore it and show the label alone).
 config_inputs:
-  - { key: terminal.cwd, label: "A local repo to start in (absolute path; optional — it is registered as a project and the terminal opens there)", type: path, project: true }
-  - { key: github.write, label: "Let the agent write to GitHub when you ask (open/comment/label/merge issues and PRs). Off = read-only", type: boolean, default: false }
+  - key: terminal.cwd
+    label: "Start in a local repo"
+    help: "Registered as a managed project the agent can reach, and the terminal opens there."
+    type: path
+    project: true
+  - key: github.write
+    label: "Allow GitHub writes"
+    help: "Lets the agent open, comment on, label and merge issues and PRs when you ask. Off = read-only."
+    type: boolean
+    default: false
 
 config:                                              # recommended defaults (you apply them)
   # Hands-on coding on the operator's machine: read and run freely, with a per-command
@@ -123,7 +135,7 @@ config:                                              # recommended defaults (you
   # in Settings ▸ GitHub). READ-ONLY by default: issues, PRs, diffs, CI status and repo
   # files — for getting up to speed and reading the CI failure you're debugging. The
   # navigator never posts, pushes, labels or merges on its own; `write: true` (the
-  # Configure toggle above, or Settings ▸ GitHub) binds the write tools for when you ask.
+  # *Allow GitHub writes* switch above, or Settings ▸ GitHub) binds the write tools for when you ask.
   # No `default_repo`: the plugin derives repos from the projects you onboard.
   # Terminal (v0.9.0+): split panes, login shells, and agent terminal tools gated by
   # `agent_access`. READ for a navigator: the agent can list and read your terminals ("what's
