@@ -71,7 +71,7 @@ name: Engineer
 # plugin-release.yml (.github/workflows/release.yml); protoAgent's bundle loader ignores it.
 # Bump it in the PR that ships the release, then merge as `chore: release vX.Y.Z` (or
 # run the Release workflow by hand).
-version: 0.1.3
+version: 0.2.0
 description: >-
   A hands-on pair-programming navigator for the operator's own machine. Point it at a
   repo (a git URL or a folder) and it clones or registers it, proves the toolchain,
