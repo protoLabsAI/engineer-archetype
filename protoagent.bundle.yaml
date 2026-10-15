@@ -12,8 +12,13 @@
 # hypothesis first, reviews their diff, and runs the checks. It edits or commits only
 # when the operator's latest message says so. See README.md for why.
 #
-# CORE FLOOR — protoAgent >= 0.180.0 (bundles carry no min-version, so it is stated
+# CORE FLOOR — protoAgent >= 0.182.0 (bundles carry no min-version, so it is stated
 # here and in the README, not enforced):
+#   * the atlas member's manifest declares min_protoagent_version 0.182.0 (the
+#     `protoagent:code:open` view bridge its code links use); the Atlas-aware
+#     repo-onboard / engineer persona ships in core with protoAgent #4242 — on a core
+#     without it Atlas still loads and works by hand, but onboarding draws the Mermaid
+#     overview and never offers the model;
 #   * the in-tree `engineer` skill pack ships with the core (protoAgent PR that added
 #     this archetype's catalog row); on an older core that `builtin` member is missing
 #     and the agent boots without its skills;
@@ -50,7 +55,11 @@
 # Host). A navigator turn reads a lot of code; a strong model with prompt caching is
 # the comfortable choice.
 #
-# PIN LIFECYCLE (ADR 0049): the external member is pinned to a release TAG; on core
+# ATLAS needs Node.js >= 20 to lay out diagrams: the `node` on PATH, or protoAgent's
+# managed Node runtime (one click on the setup banner Atlas raises when neither is there).
+# Without it the view shows that banner; the rest of the archetype is unaffected.
+#
+# PIN LIFECYCLE (ADR 0049): the external members are pinned to a release TAG; on core
 # >= 0.146 that pin is a FLOOR (installs take the newest COMPATIBLE tag — caret
 # semantics, so for 0.x the minor is the boundary). Bump it deliberately only to adopt
 # an out-of-range release; the verify workflow proves each pin set. Keep member
@@ -71,7 +80,9 @@ description: >-
   you write the fix, it reviews and runs the checks, you commit. It points at code in
   the console's code pane, opens your editor on the line when you're about to type,
   gives you a real terminal beside chat, and reads GitHub (issues, PRs, CI) to get up to
-  speed. It never edits, commits, or posts to GitHub unless you ask.
+  speed. With Atlas it maps the repo's architecture as a drill-down diagram that lives in
+  the repo (architecture/, committed with the code) and tours it in presenter mode. It
+  never edits, commits, or posts to GitHub unless you ask.
 
 # The core version this pin set was last verified against (ADR 0049) — metadata, not
 # enforced. See CORE FLOOR above.
@@ -84,8 +95,9 @@ plugins:
   - { id: delegates, builtin: true }                                                  # delegate_to — an optional coding agent, only on the operator's say-so
   - { id: terminal,  url: https://github.com/protoLabsAI/terminal-plugin, ref: v0.9.0 }  # the OPERATOR's shell beside chat; the agent may READ it (agent_access: read)
   - { id: github,    url: https://github.com/protoLabsAI/github-plugin,   ref: v0.8.0 }  # READ tools over `gh` (issues, PRs, diffs, CI, files); writes off by default
+  - { id: atlas,     url: https://github.com/protoLabsAI/atlas-plugin,    ref: v0.1.0 }  # drill-down architecture map from the repo's architecture/*.c4 (LikeC4); tours + presenter; needs Node >= 20
 
-enabled: [engineer, craft, friction, delegates, terminal, github]   # suggested turn-on list
+enabled: [engineer, craft, friction, delegates, terminal, github, atlas]   # suggested turn-on list
 
 # Create-time setup prompts (#2934, core >= 0.144.0) — the set-up step in the Setup
 # Wizard and the New Agent panel renders these and writes each answer at its key.
@@ -160,6 +172,12 @@ config:                                              # recommended defaults (you
     # run_command is this persona's main instrument, not an escape hatch (cores before
     # 0.180.0 logged every call as friction).
     escape_hatch_exempt: [run_command]
+  # Atlas: the architecture model LIVES IN THE REPO — `architecture/` under the project
+  # root, committed and reviewed with the code. The persona offers to write it (asking
+  # first) and uses an existing one as the onboarding overview. `project` blank = the
+  # console's current project. Node: blank `node_path` = PATH, then the managed runtime.
+  atlas:
+    model_dir: architecture
 
 # Agent archetype (ADR 0042 / 0100) — presents this bundle as the "Engineer" agent type
 # in the new-agent picker. `soul_preset` gives a DIRECT `plugin install <url>` the
@@ -168,7 +186,9 @@ config:                                              # recommended defaults (you
 # No `requires_tools` (capability contract) on purpose: every tool the persona commits to
 # (show_code, run_command, open_in_editor, onboard_project, memory_ingest) is a CORE tool
 # bound by the recommended `filesystem`/`onboarding` config above, not by a member plugin,
-# and it never commits to a GitHub write. A contract naming core tools would fail
+# and it never commits to a GitHub write. The atlas tools are used when bound and skipped
+# when not (onboarding falls back to a Mermaid overview), so they aren't a contract either.
+# A contract naming core tools would fail
 # scripts/verify_bundle.py (which loads members only) without catching anything new.
 archetype:
   label: Engineer
