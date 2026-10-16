@@ -44,12 +44,13 @@ It ends with a three-bullet recap (cause, fix, how it was verified) you could sa
 
 | plugin | source | role |
 |---|---|---|
-| `engineer` | builtin (protoAgent ≥ 0.180.0) | the navigator skills: `repo-onboard` (setup + guided tour) and `debug-loop` (seven guided steps, plus an appendix on why LLM/agent apps "stop without answering"). Off for every other agent. |
+| `engineer` | builtin (protoAgent ≥ 0.180.0) | the navigator skills: `repo-onboard` (setup, architecture overview — the Atlas model when there is one — and a guided tour) and `debug-loop` (seven guided steps, plus an appendix on why LLM/agent apps "stop without answering"). Off for every other agent. |
 | `craft` | builtin | `/code-review`, `/grill`, `/due-diligence` and friends, rituals you type |
 | `friction` | builtin | harness-friction ledger: a rough edge leaves evidence instead of vanishing |
 | `delegates` | builtin | `delegate_to`, for an optional coding agent, used only when you say so |
 | `terminal` | [terminal-plugin](https://github.com/protoLabsAI/terminal-plugin) | **your** terminal: a real PTY shell in a console view beside chat |
 | `github` | [github-plugin](https://github.com/protoLabsAI/github-plugin) | GitHub over the `gh` CLI, **read-only by default**: issues, PRs, diffs, CI status, repo files |
+| `atlas` | [atlas-plugin](https://github.com/protoLabsAI/atlas-plugin) | a drill-down **architecture map** of the repo, from a LikeC4 model in the repo's `architecture/`, with guided tours in presenter mode |
 
 The persona is protoAgent's `engineer` soul preset (`config/soul-presets/engineer.md` in
 core). The skills are core's in-tree `engineer` plugin. Both ship with protoAgent, and this
@@ -71,6 +72,34 @@ runs and PATH matches your usual terminal. The terminal's WebSocket is gated by 
 so it also works on a fleet member behind the hub (terminal-plugin v0.5.1+; the bundle pins v0.9.0). On Windows it needs
 `pywinpty` (declared with a `sys_platform == 'win32'` marker; the install dialog offers it).
 macOS and Linux use the stdlib PTY and need nothing.
+
+### Atlas: the architecture map lives in the repo
+
+[Atlas](https://github.com/protoLabsAI/atlas-plugin) renders a repo's architecture as a
+diagram you drill into (system → containers → components), from a [LikeC4](https://likec4.dev)
+model: a few `.c4` files in the repo's **`architecture/`** folder, committed and reviewed with
+the code like any other file. Click an element to zoom in; its code links open the exact
+lines in the console's **code pane**. Tours (`architecture/atlas.tours.json`) play as
+slides in presenter mode.
+
+How the navigator uses it (core's `repo-onboard`, protoAgent ≥ the release with #4242):
+
+- **The repo already has `architecture/`** → that model *is* the onboarding overview: it
+  validates it (problems are findings, not fixes), opens it beside chat, and offers to
+  extend it where it's missing what the code shows.
+- **No model yet** → you get today's code-linked Mermaid overview, plus a one-line offer to
+  write the Atlas model. It writes into your repo, so it asks first, and writes only on your
+  yes. It validates the model until it's clean (`atlas_validate`), opens it, and leaves the
+  files uncommitted for you to review and commit.
+- **The guided tour** becomes an Atlas tour, one slide per turn, with `show_code` on the
+  lines behind each slide, so the next person can replay it.
+- **Mermaid stays** for one-off pictures (this bug's call sequence). Without Atlas enabled,
+  onboarding is exactly the Mermaid flow.
+
+**Needs Node.js 20+** to lay out diagrams: the `node` on PATH, or protoAgent's managed Node
+runtime. If neither is there, Atlas shows a setup banner with a one-click **Install Node
+runtime** button; the rest of the archetype works without it. The model directory is
+`model_dir` (default `architecture`) in Settings ▸ Plugins ▸ Atlas.
 
 ### GitHub: read by default, write when you decide
 
@@ -108,9 +137,13 @@ Pick **Engineer** in the new-agent picker (Fleet ▸ New agent, or the setup wiz
 python -m server plugin install https://github.com/protoLabsAI/engineer-archetype
 ```
 
-**Core floor: protoAgent ≥ 0.180.0.** Bundles can't enforce a minimum version, so here's
+**Core floor: protoAgent ≥ 0.182.0.** Bundles can't enforce a minimum version, so here's
 what an older core misses:
 
+- the `atlas` member needs 0.182.0 (its manifest's `min_protoagent_version`; code links use
+  the `protoagent:code:open` view bridge). The Atlas-aware onboarding (use or offer the
+  `architecture/` model, Atlas tours) ships in core with protoAgent #4242; on an older core
+  Atlas still works by hand, but onboarding draws only the Mermaid overview;
 - the `engineer` skill pack is missing (it ships in core);
 - before 0.180.0 (#3618) the plugin dependency check ignored PEP 508 markers, so the
   terminal's Windows-only `pywinpty` showed as a **missing dependency** on macOS/Linux;
@@ -247,7 +280,7 @@ you're debugging.
 
 ## Pin lifecycle (ADR 0049)
 
-The one external member (`terminal`) is pinned to a release tag, which is a **floor**:
+The external members (`terminal`, `github`, `atlas`) are pinned to release tags, each a **floor**:
 installs take its newest *compatible* release (caret semantics; for 0.x the minor is the
 boundary). `scripts/verify_bundle.py`, run by `.github/workflows/verify-bundle.yml` on
 every PR and weekly, installs this manifest into a scratch agent on a fresh protoAgent
