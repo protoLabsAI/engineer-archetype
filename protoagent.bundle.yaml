@@ -94,7 +94,7 @@ plugins:
   - { id: friction,  builtin: true }                                                  # harness-friction ledger — a rough edge leaves evidence
   - { id: delegates, builtin: true }                                                  # delegate_to — an optional coding agent, only on the operator's say-so
   - { id: terminal,  url: https://github.com/protoLabsAI/terminal-plugin, ref: v0.9.5 }  # the OPERATOR's shell beside chat; the agent may READ it (agent_access: read)
-  - { id: github,    url: https://github.com/protoLabsAI/github-plugin,   ref: v0.9.3 }  # READ tools over `gh` (issues, PRs, diffs, CI, files); writes off by default
+  - { id: github,    url: https://github.com/protoLabsAI/github-plugin,   ref: v0.10.0 }  # READ tools over `gh` (issues, PRs, diffs, CI, files); writes off by default
   - { id: atlas,     url: https://github.com/protoLabsAI/atlas-plugin,    ref: v0.2.7 }  # drill-down architecture map from the repo's architecture/*.c4 (LikeC4); tours + presenter, live agent navigation, recording mode; needs Node >= 20
 
 enabled: [engineer, craft, friction, delegates, terminal, github, atlas]   # suggested turn-on list
